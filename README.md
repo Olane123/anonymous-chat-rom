@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💬 Приватный чат-рум без телеметрии
 
-## Getting Started
+[![Лицензия: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Версия](https://img.shields.io/badge/версия-1.0.0-blue)](https://github.com/yourusername/private-chat)
+[![Статус сборки](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/yourusername/private-chat)
 
-First, run the development server:
+> **Полная приватность.** Никакой аналитики, логирования или внешних запросов.  
+> Только вы, ваш собеседник и чистый дизайн в стиле *Liquid Glass*.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 📖 О проекте
+
+Этот проект — минималистичный веб-чат для приватного общения в реальном времени.  
+Всё, что вам нужно — открыть страницу, выбрать никнейм и начать общаться.
+
+**Ключевые особенности:**
+- 🔒 **Полная анонимность** — данные не покидают ваш браузер, сервер не хранит историю.
+- 📨 **Отправка сообщений** — поддерживается текст и базовое форматирование (через Markdown).
+- ✏️ **Смена никнейма** — вы можете изменить имя в любой момент, и все участники увидят обновление.
+- 🪟 **Дизайн Liquid Glass** — эффект «жидкого стекла»: прозрачные панели, размытие, плавные анимации.
+- 📱 **Адаптивность** — комфортно работает на любых экранах: от смартфонов до настольных ПК.
+
+---
+## 🚀 Демо
+
+> Вы можете опробовать сайт здесь --> anonymous-chat-rom.vercel.app
+---
+
+---
+## 🎨 Дизайн и концепция
+- Интерфейс построен на принципах Liquid Glass:
+
+- Полупрозрачные фоны с эффектом размытия (backdrop-filter: blur)
+
+- Градиентные обводки, имитирующие переливы света на стекле
+```css
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.15);
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📦 Технологии
+- Frontend: HTML5, CSS3 (Flexbox/Grid), TypeScript / JavaScript (ES6)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Реальное время: FireStore (Firebase)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Сборка: Next.js
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Иконки: Font Awesome / SVG-спрайты
+---
+Сделано с ❤️ для тех, кто ценит приватность и красоту.
