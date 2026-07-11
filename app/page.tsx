@@ -1,162 +1,100 @@
 "use client"
 
-import styles from "./home.module.css"
-import Image from "next/image";
-import PersonIcon from "@/public/person.svg"
-import { useEffect, useState, useRef } from "react";
+import styles from "./welcome.module.css"
+import { Registration, Login } from "@/app/api/auth/authification";
+import {useState} from "react";
+import {useRouter} from "next/navigation";
 
-interface Message {
-    id: string;
-    text: string;
-    username: string;
-    createdAt?: { seconds: number; nanoseconds: number };
-}
+export default function WelcomePage() {
+    const [currentOpenPage, setOpenPage] = useState("welcomePage")
 
-export default function Home() {
-    const [isOpen, setProfileSettingsVisible] = useState<boolean>(false)
-    const [currentUserName, setCurrentUserName] = useState<string>(() => {
-        if (typeof window !== "undefined") {
-            return localStorage.getItem("username") || "Anonymous";
-        }
-        return "Anonymous";
-    });
-    const [messages, setMessages] = useState<Message[]>([])
-    const [input, setInput] = useState("")
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
 
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-
-    const toggleProfileVisible = () => {
-        setProfileSettingsVisible(!isOpen)
-
-        if (!isOpen && currentUserName.trim() === "")
-        {
-            setCurrentUserName("Anonymous")
-        }
-    }
+    const router = useRouter();
 
     const changeUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setCurrentUserName(e.target.value)
-
-        localStorage.setItem("username", e.target.value)
+        setUsername(e.target.value + "@my-app.com")
     }
 
-    const fetchMessages = async () => {
-        try {
-            const response = await fetch("/api/messages");
-            if (response.ok) {
-                const data = await response.json();
-                setMessages(data);
-            }
-        } catch (error) {
-            console.error("Ошибка при получении сообщений через API:", error);
+    const changePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPassword(e.target.value)
+    }
+
+    const submitRegistration = async(e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        if (!username.trim() && !password.trim())
+        {
+            alert("Please fill out all fields")
         }
-    };
 
-    useEffect(() => {
-        fetchMessages();
+        const {user, error} = await Registration(username, password)
 
-        const interval = setInterval(fetchMessages, 3000);
-
-        return () => clearInterval(interval);
-    }, [])
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    useEffect(() => {
-        scrollToBottom()
-    }, [messages]);
-
-    const sendMessages = async (e: React.FormEvent | React.MouseEvent) => {
-        e.preventDefault()
-        if (input.trim() === "") return;
-
-        const senderName = currentUserName.trim() || "Anonymous";
-
-        try {
-            const response = await fetch("/api/messages", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    text: input,
-                    username: currentUserName,
-                }),
-            });
-
-            if (!response.ok) {
-                const errText = await response.text();
-                throw new Error(errText || "Ошибка сервера");
-            }
-
-            const newMessage: Message = {
-                id: Date.now().toString(),
-                text: input,
-                username: senderName,
-                createdAt: { seconds: Math.floor(Date.now() / 1000), nanoseconds: 0 }
-            };
-
-            setMessages((prev) => [...prev, newMessage]); // Обновляем экран сразу
-            setInput("");
-            fetchMessages();
+        if (error)
+        {
+            alert(error.message)
         }
-        catch (error: any) {
-            console.error("Client fetch error:", error);
-            alert("Не удалось отправить: " + error.message);
+
+        alert("Registration successfully " + username + "" + password)
+
+        router.push("/home")
+    }
+
+    const submitLogin = async(e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        if (!username.trim() && !password.trim())
+        {
+            alert("Please fill out all fields")
         }
+
+        const {user, error} = await Login(username, password)
+
+        if (error)
+        {
+            alert(error)
+            return
+        }
+
+        alert("Registration successfully")
+        router.push("/home")
     }
 
     return (
         <>
-            <Image src={PersonIcon} alt={"profile"} width={48} height={48} className={styles.profileSettingsBtn} onClick={toggleProfileVisible}/>
-
-
+            <h1 className={styles.header}>Anonymous Chat Room</h1>
 
             {
-                isOpen && (
-                    <div className={styles.profileSettings}>
-                        <h1>Profile Settings</h1>
-                        <input
-                            type={"text"}
-                            placeholder={"Type your username"}
-                            value={currentUserName}
-                            maxLength={10}
-                            onChange={changeUsername}
-                        />
+                currentOpenPage === "welcomePage" && (
+                    <div className={`${currentOpenPage === "welcomePage" ? styles.welcomeContainer : ""}`}>
+                        <input type={"button"} value={"Register"} onClick={() => {setOpenPage("registerPage")}} />
+                        <input type={"button"} value={"Login"} onClick={() => {setOpenPage("loginPage")}} />
                     </div>
                 )
             }
 
-            <div className={styles.messagesContainer}>
-                {messages.map((msg) => (
-                    <div key={msg.id} className={styles.message}>
-                        <strong>{msg.username}: </strong> {msg.text}{" "}
-                        <div className={styles.dateTime}>
-                            {msg.createdAt?.seconds &&
-                                new Date(msg.createdAt.seconds * 1000).toLocaleString()
-                            }
-                        </div>
-                    </div>
-                ))}
-                <div ref={messagesEndRef} />
-            </div>
+            {
+                currentOpenPage === "registerPage" && (
+                    <div className={styles.registerActive}>
+                        <input type={"text"} placeholder={"Type your username"} maxLength={10} onChange={changeUsername}/>
+                        <input type={"password"} placeholder={"Type your password"} onChange={changePassword}/>
 
-            <form onSubmit={sendMessages} className={styles.inputContainer}>
-                <textarea
-                    rows={1}
-                    placeholder={"Type message"}
-                    className={styles.textInput}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            sendMessages(e);
-                        }
-                    }}
-                />
-                <button type="submit" className={styles.sendBtn}>Send</button>
-            </form>
+                        <input type={"button"} value={"Submit Registration"} onClick={  submitRegistration}/>
+                        <input type={"button"} value={"Back"} onClick={() => setOpenPage("welcomePage")}/>
+                    </div>
+                )
+            }
+
+            {
+                currentOpenPage === "loginPage" && (
+                    <div className={styles.loginActive}>
+                        <input type={"text"} placeholder={"Type your username"} maxLength={10} onChange={changeUsername}/>
+                        <input type={"password"} placeholder={"Type your password"} onChange={changePassword}/>
+
+                        <input type={"button"} value={"Submit Login"} onClick={submitLogin}/>
+                        <input type={"button"} value={"Back"} onClick={() => setOpenPage("welcomePage")}/>
+                    </div>
+                )
+            }
         </>
-    );
+    )
 }
