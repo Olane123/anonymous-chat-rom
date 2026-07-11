@@ -76,7 +76,9 @@ export default function Home() {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(Auth, (user) => {
             if (user && user.displayName) {
-                setCurrentUserName(user.displayName);
+                const username = user.displayName
+                const processedText = username.replace('@my-app.com', '');
+                setCurrentUserName(processedText);
             } else {
                 const savedName = localStorage.getItem("username");
                 if (savedName) {
