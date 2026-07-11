@@ -10,7 +10,7 @@ const robotoSlab = Roboto_Slab({
 
 
 export const metadata: Metadata = {
-  title: "Anonymous chat rom"
+  title: "Anonymous chat room"
 };
 
 export default function RootLayout({
