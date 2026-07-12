@@ -175,13 +175,13 @@ export default function Home() {
                             onChange={(e) => setEditName(e.target.value)}
                         />
                     </div>
-                    <button onClick={handleSaveUsername} disabled={isSaving} style={{ marginTop: '15px', color: 'white', backgroundColor: 'green', border: 'none', padding: '5px 10px', cursor: 'pointer', borderRadius: '4px'}}>
+                    <button onClick={handleSaveUsername} disabled={isSaving} className={styles.saveBtn} style={{ }}>
                         {isSaving ? "Checking..." : "Save"}
                     </button>
                     {usernameError && (
                         <p style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>{usernameError}</p>
                     )}
-                    <button onClick={handleLogout} style={{ marginTop: '15px', color: 'white', backgroundColor: 'red', border: 'none', padding: '5px 10px', cursor: 'pointer', borderRadius: '4px' }}>
+                    <button onClick={handleLogout} className={styles.logoutBtn}>
                         Logout
                     </button>
                 </div>
