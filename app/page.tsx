@@ -53,7 +53,7 @@ export default function WelcomePage() {
 
         if (error) {
             if (error.includes("invalid-credential")) {
-                alert("Неверное имя пользователя или пароль");
+                alert("Incorrect username or password");
             } else {
                 alert(error);
             }

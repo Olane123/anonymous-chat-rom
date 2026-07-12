@@ -5,8 +5,8 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfi
 export async function Registration(email, password, username) {
     const cleanedName = username.trim();
 
-    if (!cleanedName) return { user: null, error: "Имя не может быть пустым" };
-    if (cleanedName.toLowerCase() === "anonymous") return { user: null, error: "Это имя зарезервировано" };
+    if (!cleanedName) return { user: null, error: "The name cannot be empty." };
+    if (cleanedName.toLowerCase() === "anonymous") return { user: null, error: "This name is reserved." };
 
     const usernameRef = doc(db, "usernames", cleanedName.toLowerCase());
 
@@ -17,7 +17,7 @@ export async function Registration(email, password, username) {
             const docSnap = await transaction.get(usernameRef);
 
             if (docSnap.exists()) {
-                throw new Error("Этот username уже занят другим пользователем");
+                throw new Error("This username is already taken by another user.");
             }
             const userCredential = await createUserWithEmailAndPassword(Auth, email, password);
             firebaseUser = userCredential.user;
@@ -30,7 +30,7 @@ export async function Registration(email, password, username) {
             return { user: firebaseUser, error: null };
         }
 
-        return { user: null, error: "Неизвестная ошибка при регистрации" };
+        return { user: null, error: "Unknown error during registration" };
     } catch (error) {
         return { user: null, error: error.message };
     }
@@ -47,11 +47,11 @@ export async function Login(email, password) {
 
 export async function updateUniqueUsername(newUsername) {
     const user = Auth.currentUser;
-    if (!user) return { success: false, error: "Вы не авторизованы" };
+    if (!user) return { success: false, error: "You are not logged in." };
 
     const cleanedName = newUsername.trim();
-    if (!cleanedName) return { success: false, error: "Имя не может быть пустым" };
-    if (cleanedName.toLowerCase() === "anonymous") return { success: false, error: "Имя 'Anonymous' зарезервировано" };
+    if (!cleanedName) return { success: false, error: "The name cannot be empty." };
+    if (cleanedName.toLowerCase() === "anonymous") return { success: false, error: "The name 'Anonymous' is reserved." };
 
     const oldUsername = user.displayName ? user.displayName.replace('@my-app.com', '') : "";
 
@@ -64,7 +64,7 @@ export async function updateUniqueUsername(newUsername) {
             const docSnap = await transaction.get(newUsernameRef);
 
             if (docSnap.exists()) {
-                throw new Error("Это имя уже занято другим пользователем");
+                throw new Error("This name is already taken by another user.");
             }
 
             transaction.set(newUsernameRef, { uid: user.uid });

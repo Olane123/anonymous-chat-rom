@@ -41,7 +41,7 @@ export default function Home() {
 
     const handleSaveUsername = async () => {
         if (!editName.trim()) {
-            setUsernameError("Имя не может быть пустым");
+            setUsernameError("The name cannot be empty.");
             return;
         }
         setIsSaving(true);
@@ -52,7 +52,7 @@ export default function Home() {
             setCurrentUserName(editName);
             localStorage.setItem("username", editName);
             setUsernameError(null);
-            alert("Имя успешно изменено и сохранено!");
+            alert("The name has been successfully changed and saved!");
         } else {
             setUsernameError(result.error);
         }
@@ -65,7 +65,7 @@ export default function Home() {
             localStorage.removeItem("username");
             router.push("/");
         } catch (error) {
-            console.error("Ошибка при выходе:", error);
+            console.error("Error on exit:", error);
         }
     }
 
@@ -77,7 +77,7 @@ export default function Home() {
                 setMessages(data);
             }
         } catch (error) {
-            console.error("Ошибка при получении сообщений через API:", error);
+            console.error("Error retrieving messages via the API:", error);
         }
     };
 
@@ -131,7 +131,7 @@ export default function Home() {
 
             if (!response.ok) {
                 const errText = await response.text();
-                throw new Error(errText || "Ошибка сервера");
+                throw new Error(errText || "Server error");
             }
 
             const newMessage: Message = {
@@ -146,7 +146,7 @@ export default function Home() {
         }
         catch (error: any) {
             console.error("Client fetch error:", error);
-            alert("Не удалось отправить: " + error.message);
+            alert("Failed to send: " + error.message);
         }
     }
 
