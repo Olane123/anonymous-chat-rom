@@ -155,3 +155,9 @@
     width: fit-content;
     word-break: break-word;
 }
+
+.saveBtn{
+    color: white;
+    background-color: green;
+    font-size: 12px;
+}

@@ -1,22 +1,84 @@
-import { Auth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "@/app/lib/firebase";
-import { updateProfile } from "firebase/auth"
+import { db, Auth } from "@/app/lib/firebase";
+import { doc, runTransaction } from "firebase/firestore";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 
-export async function Registration(username, password) {
+export async function Registration(email, password, username) {
+    const cleanedName = username.trim();
+
+    if (!cleanedName) return { user: null, error: "Имя не может быть пустым" };
+    if (cleanedName.toLowerCase() === "anonymous") return { user: null, error: "Это имя зарезервировано" };
+
+    const usernameRef = doc(db, "usernames", cleanedName.toLowerCase());
+
     try {
-        const userCredential = await createUserWithEmailAndPassword(Auth, username, password);
-        await updateProfile(userCredential.user, {displayName: username})
+        let firebaseUser = null;
+
+        await runTransaction(db, async (transaction) => {
+            const docSnap = await transaction.get(usernameRef);
+
+            if (docSnap.exists()) {
+                throw new Error("Этот username уже занят другим пользователем");
+            }
+            const userCredential = await createUserWithEmailAndPassword(Auth, email, password);
+            firebaseUser = userCredential.user;
+
+            transaction.set(usernameRef, { uid: firebaseUser.uid });
+        });
+
+        if (firebaseUser) {
+            await updateProfile(firebaseUser, { displayName: cleanedName });
+            return { user: firebaseUser, error: null };
+        }
+
+        return { user: null, error: "Неизвестная ошибка при регистрации" };
+    } catch (error) {
+        return { user: null, error: error.message };
+    }
+}
+
+export async function Login(email, password) {
+    try {
+        const userCredential = await signInWithEmailAndPassword(Auth, email, password);
         return { user: userCredential.user, error: null };
     } catch (error) {
         return { user: null, error: error.message };
     }
 }
 
-export async function Login(username, password) {
+export async function updateUniqueUsername(newUsername) {
+    const user = Auth.currentUser;
+    if (!user) return { success: false, error: "Вы не авторизованы" };
+
+    const cleanedName = newUsername.trim();
+    if (!cleanedName) return { success: false, error: "Имя не может быть пустым" };
+    if (cleanedName.toLowerCase() === "anonymous") return { success: false, error: "Имя 'Anonymous' зарезервировано" };
+
+    const oldUsername = user.displayName ? user.displayName.replace('@my-app.com', '') : "";
+
+    if (oldUsername === cleanedName) return { success: true };
+
+    const newUsernameRef = doc(db, "usernames", cleanedName.toLowerCase());
+
     try {
-        const userCredential = await signInWithEmailAndPassword(Auth, username, password);
-        await updateProfile(userCredential.user, {displayName: username})
-        return { user: userCredential.user, error: null };
+        await runTransaction(db, async (transaction) => {
+            const docSnap = await transaction.get(newUsernameRef);
+
+            if (docSnap.exists()) {
+                throw new Error("Это имя уже занято другим пользователем");
+            }
+
+            transaction.set(newUsernameRef, { uid: user.uid });
+
+            if (oldUsername && oldUsername.toLowerCase() !== "anonymous") {
+                const oldUsernameRef = doc(db, "usernames", oldUsername.toLowerCase());
+                transaction.delete(oldUsernameRef);
+            }
+        });
+
+        await updateProfile(user, { displayName: cleanedName });
+
+        return { success: true, error: null };
     } catch (error) {
-        return { user: null, error: error.message };
+        return { success: false, error: error.message };
     }
 }

@@ -2,99 +2,97 @@
 
 import styles from "./welcome.module.css"
 import { Registration, Login } from "@/app/api/auth/authification";
-import {useState} from "react";
-import {useRouter} from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function WelcomePage() {
     const [currentOpenPage, setOpenPage] = useState("welcomePage")
-
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
-
     const router = useRouter();
 
     const changeUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setUsername(e.target.value + "@my-app.com")
+        setUsername(e.target.value.trim())
     }
 
     const changePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
         setPassword(e.target.value)
     }
 
-    const submitRegistration = async(e) => {
+    const submitRegistration = async (e: React.FormEvent | React.MouseEvent) => {
         if (e && e.preventDefault) e.preventDefault();
-        if (!username.trim() && !password.trim())
-        {
-            alert("Please fill out all fields")
+
+        if (!username || !password) {
+            alert("Please fill out all fields");
+            return;
         }
 
-        const {user, error} = await Registration(username, password)
+        const generatedEmail = `${username.toLowerCase()}@my-app.com`;
+        const { error } = await Registration(generatedEmail, password, username)
 
-        if (error)
-        {
-            alert(error.message)
+        if (error) {
+            alert(error);
+            return;
         }
 
-        alert("Registration successfully " + username + "" + password)
-
-        router.push("/home")
+        localStorage.setItem("username", username);
+        alert("Registration successfully completed!");
+        router.push("/home");
     }
 
-    const submitLogin = async(e) => {
+    const submitLogin = async (e: React.FormEvent | React.MouseEvent) => {
         if (e && e.preventDefault) e.preventDefault();
-        if (!username.trim() && !password.trim())
-        {
-            alert("Please fill out all fields")
+
+        if (!username || !password) {
+            alert("Please fill out all fields");
+            return;
         }
 
-        const {user, error} = await Login(username, password)
+        const generatedEmail = `${username.toLowerCase()}@my-app.com`;
+        const { error } = await Login(generatedEmail, password);
 
-        if (error)
-        {
-            alert(error)
-            return
+        if (error) {
+            if (error.includes("invalid-credential")) {
+                alert("Неверное имя пользователя или пароль");
+            } else {
+                alert(error);
+            }
+            return;
         }
 
-        alert("Registration successfully")
-        router.push("/home")
+        localStorage.setItem("username", username);
+        alert("Logged in successfully!");
+        router.push("/home");
     }
 
     return (
         <>
             <h1 className={styles.header}>Anonymous Chat Room</h1>
 
-            {
-                currentOpenPage === "welcomePage" && (
-                    <div className={`${currentOpenPage === "welcomePage" ? styles.welcomeContainer : ""}`}>
-                        <input type={"button"} value={"Register"} onClick={() => {setOpenPage("registerPage")}} />
-                        <input type={"button"} value={"Login"} onClick={() => {setOpenPage("loginPage")}} />
-                    </div>
-                )
-            }
+            {currentOpenPage === "welcomePage" && (
+                <div className={styles.welcomeContainer}>
+                    <input type="button" value="Register" onClick={() => setOpenPage("registerPage")} />
+                    <input type="button" value="Login" onClick={() => setOpenPage("loginPage")} />
+                </div>
+            )}
 
-            {
-                currentOpenPage === "registerPage" && (
-                    <div className={styles.registerActive}>
-                        <input type={"text"} placeholder={"Type your username"} maxLength={10} onChange={changeUsername}/>
-                        <input type={"password"} placeholder={"Type your password"} onChange={changePassword}/>
+            {currentOpenPage === "registerPage" && (
+                <div className={styles.registerActive}>
+                    <input type="text" placeholder="Type your username" maxLength={10} value={username} onChange={changeUsername}/>
+                    <input type="password" placeholder="Type your password" value={password} onChange={changePassword}/>
+                    <input type="button" value="Submit Registration" onClick={submitRegistration}/>
+                    <input type="button" value="Back" onClick={() => { setOpenPage("welcomePage"); setUsername(""); setPassword(""); }}/>
+                </div>
+            )}
 
-                        <input type={"button"} value={"Submit Registration"} onClick={  submitRegistration}/>
-                        <input type={"button"} value={"Back"} onClick={() => setOpenPage("welcomePage")}/>
-                    </div>
-                )
-            }
-
-            {
-                currentOpenPage === "loginPage" && (
-                    <div className={styles.loginActive}>
-                        <input type={"text"} placeholder={"Type your username"} maxLength={10} onChange={changeUsername}/>
-                        <input type={"password"} placeholder={"Type your password"} onChange={changePassword}/>
-
-                        <input type={"button"} value={"Submit Login"} onClick={submitLogin}/>
-                        <input type={"button"} value={"Back"} onClick={() => setOpenPage("welcomePage")}/>
-                    </div>
-                )
-            }
+            {currentOpenPage === "loginPage" && (
+                <div className={styles.loginActive}>
+                    <input type="text" placeholder="Type your username" maxLength={10} value={username} onChange={changeUsername}/>
+                    <input type="password" placeholder="Type your password" value={password} onChange={changePassword}/>
+                    <input type="button" value="Submit Login" onClick={submitLogin}/>
+                    <input type="button" value="Back" onClick={() => { setOpenPage("welcomePage"); setUsername(""); setPassword(""); }}/>
+                </div>
+            )}
         </>
     )
 }
